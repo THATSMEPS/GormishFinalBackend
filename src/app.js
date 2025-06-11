@@ -25,6 +25,11 @@ const cuisineRoutes = require('./routes/cuisines');
 
 const app = express();
 
+// Root route handler to redirect or inform about API base path
+app.get('/', (req, res) => {
+  res.send('Welcome! The API base path is /api');
+});
+
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'PATCH', 'OPTIONS', 'PUT', 'DELETE'],
