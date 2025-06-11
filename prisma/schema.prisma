@@ -1,0 +1,233 @@
+generator client {
+  provider = "prisma-client-js"
+  output = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model AreaTable {
+  pincode     Int          @unique @map("area_pincode")
+  areaName    String       @map("area_name") @db.VarChar
+  cityName    String       @map("city_name") @db.VarChar
+  stateName   state_enum   @default(Gujarat) @map("state_name")
+  latitude    Float        @map("area_latitude")
+  longitude   Float        @map("area_longitude")
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @map("area_id") @db.Uuid
+  customers   Customer[]
+  restaurants Restaurant[]
+
+  @@map("area_table")
+}
+
+model Restaurant {
+  name                 String        @map("r_name") @db.VarChar
+  createdAt            DateTime      @default(now()) @map("created_at") @db.Timestamp(6)
+  mobile               String        @unique @map("r_mobile") @db.VarChar
+  email                String        @unique @map("r_email") @db.VarChar
+  password             String        @map("r_password") @db.VarChar
+  approval             Boolean       @default(false) @map("r_approval")
+  cuisines             String        @map("r_cuisines") @db.VarChar
+  vegNonveg            String        @map("r_veg_nonveg") @db.VarChar
+  applicableTaxBracket Decimal?      @map("r_applicable_tax_bracket") @db.Decimal(10, 2)
+  trusted              Boolean       @default(true) @map("r_trusted")
+  hours                Json          @map("r_hours") @db.Json
+  address              Json          @map("r_address") @db.Json
+  serving_radius       Int           @map("r_serving_radius") @db.Integer
+  banners              String[]      @map("r_banners")
+  areaId               String        @map("r_area_id") @db.Uuid
+  id                   String        @id @default(dbgenerated("gen_random_uuid()")) @map("r_id") @db.Uuid
+  menuItems            MenuItem[]
+  reviews              OrderReview[]
+  orders               Order[]
+  area                 AreaTable     @relation(fields: [areaId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  isOpen               Boolean       @default(false) @map("r_is_open")
+  @@map("restaurants")
+}
+
+model MenuItem {
+  name             String      @map("item_name") @db.VarChar(255)
+  description      String?     @map("item_description")
+  price            Decimal     @map("item_price") @db.Decimal(10, 2)
+  discountedPrice  Decimal?    @map("item_discounted_price") @db.Decimal(10, 2)
+  isVeg            Boolean?    @default(true) @map("item_is_veg")
+  packagingCharges Decimal     @map("item_packaging_charges") @db.Decimal(10, 2)
+  cuisine          String      @map("item_cuisine") @db.VarChar
+  isAvailable      Boolean     @default(true) @map("is_available")
+  createdAt        DateTime    @default(now()) @map("item_created_at") @db.Timestamp(6)
+  updatedAt        DateTime    @default(now()) @updatedAt @map("item_updated_at") @db.Timestamp(6)
+  addons           Json?       @map("item_addons") @db.Json
+  restaurantId     String      @map("r_id") @db.Uuid
+  id               String      @id @default(dbgenerated("gen_random_uuid()")) @map("item_id") @db.Uuid
+  restaurant       Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  orderItems       OrderItem[]
+
+  @@map("menu_items")
+}
+model DeliveryPartner {
+  mobile                String               @unique @map("dp_mobile") @db.VarChar
+  name                  String               @map("dp_name") @db.VarChar
+  gender                dp_gender_enum       @map("dp_gender")
+  dateOfBirth           DateTime             @map("dp_dob") @db.Date
+  createdAt             DateTime             @default(now()) @map("dp_created_at") @db.Timestamp(6)
+  updatedAt             DateTime             @default(now()) @updatedAt @map("dp_updated_at") @db.Timestamp(6)
+  status                dp_status_enum       @default(not_approved) @map("dp_status")
+  isLive                Boolean              @map("dp_is_live")
+  liveLocation          Json?                @map("dp_live_location") @db.Json
+  vehicleType           dp_vehicle_info_enum @map("dp_vehicle_info")
+  vehicleRegistrationNo String?              @unique @map("dp_vehicle_registration_no") @db.VarChar
+  homeAddress           String               @map("dp_home_address") @db.VarChar(255)
+  id                    String               @id @default(dbgenerated("gen_random_uuid()")) @map("dp_id") @db.Uuid
+  reviews               OrderReview[]
+  orders                Order[]
+
+  @@map("delivery_partners")
+}
+
+model Customer {
+  // ✅ 'phone' is now optional (String?) and the @unique constraint is removed.
+  // This means multiple Google sign-in users can have a NULL phone number.
+  phone     String?   @map("c_phone") @db.VarChar(15) 
+  
+  email     String    @unique @map("c_email") @db.VarChar(50) // Email remains mandatory and unique
+  name      String    @map("c_name") @db.VarChar(50) // Name remains mandatory
+
+  createdAt DateTime  @default(now()) @map("c_created_at") @db.Timestamp(6)
+  
+  address   Json?     @map("c_address") @db.Json // Already optional (Json?)
+  
+  // ✅ 'areaId' is now optional (String?), and the relation field 'area' must also be optional (AreaTable?)
+  areaId    String?   @map("c_area_id") @db.Uuid 
+  area      AreaTable? @relation(fields: [areaId], references: [id], onDelete: NoAction, onUpdate: NoAction) 
+
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @map("c_id") @db.Uuid
+
+  reviews   OrderReview[]
+  orders    Order[]
+
+  @@map("customers")
+}
+
+model Order {
+  customerNotes     String?             @map("r_notes_by_customer") @db.VarChar(255)
+  distance          Decimal             @map("order_distance") @db.Decimal(10, 2)
+  status            order_status_enum   @default(preparing) @map("order_status")
+  paymentType       payment_types_enum  @map("payment_type")
+  paymentStatus     payment_status_enum @default(pending) @map("payment_status")
+  orderType         String              @map("order_type") @db.VarChar(255)
+  itemsAmount       Decimal             @map("sum_of_items_amount") @db.Decimal(10, 2)
+  gst               Decimal             @map("gst") @db.Decimal(10, 2)
+  dpAcceptedAt      DateTime?           @map("dp_accepted_at") @db.Timestamp(6)
+  dpDeliveredAt     DateTime?           @map("dp_delivered_at") @db.Timestamp(6)
+  placedAt          DateTime            @default(now()) @map("order_placed_at") @db.Timestamp(6)
+  deliveryFee       Decimal             @default(0.00) @map("delivery_fee") @db.Decimal(10, 2)
+  totalAmount       Decimal             @map("total_amount") @db.Decimal(10, 2)
+  restaurantId      String              @map("r_id") @db.Uuid
+  deliveryPartnerId String?             @map("dp_id") @db.Uuid
+  customerId        String              @map("c_id") @db.Uuid
+  address           Json?               @map("c_address") @db.Json
+  id                String              @id @default(dbgenerated("gen_random_uuid()")) @map("order_id") @db.Uuid
+  items             OrderItem[]
+  review            OrderReview[]
+  customer          Customer            @relation(fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  deliveryPartner   DeliveryPartner?    @relation(fields: [deliveryPartnerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  restaurant        Restaurant          @relation(fields: [restaurantId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+   
+           
+  @@map("orders")
+}
+
+
+model OrderItem {
+  quantity        Int      @default(1)
+  basePrice       Decimal  @map("base_price") @db.Decimal(10, 2)
+  addons          Json?    @map("item_addons") @db.Json
+  totalAddonPrice Decimal? @default(0.00) @map("total_addon_price") @db.Decimal(10, 2)
+  totalPrice      Decimal  @map("item_total_price") @db.Decimal(10, 2)
+  menuItemId      String   @map("item_id") @db.Uuid
+  orderId         String   @map("order_id") @db.Uuid
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @map("order_item_id") @db.Uuid
+  menuItem        MenuItem @relation(fields: [menuItemId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  order           Order    @relation(fields: [orderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("order_items")
+}
+
+model OrderReview {
+  reviewText        String?          @map("review_text")
+  stars             Decimal?         @map("stars") @db.Decimal(2, 1) // pratham need to add this line
+  createdAt         DateTime         @default(now()) @map("created_at") @db.Timestamp(6)
+  restaurantId      String           @map("r_id") @db.Uuid
+  deliveryPartnerId String?          @map("dp_id") @db.Uuid
+  customerId        String           @map("c_id") @db.Uuid
+  orderId           String           @map("order_id") @db.Uuid
+  id                String           @id @default(dbgenerated("gen_random_uuid()")) @map("review_id") @db.Uuid
+  customer          Customer         @relation(fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  deliveryPartner   DeliveryPartner? @relation(fields: [deliveryPartnerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  order             Order            @relation(fields: [orderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  restaurant        Restaurant       @relation(fields: [restaurantId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("order_reviews")
+}
+
+model Cuisine {
+id              String      @id @default(dbgenerated("gen_random_uuid()")) @map("cuisine_id") @db.Uuid
+cuisineName     String      @unique @map("cuisine_name")
+imageUrl        String      @map("image_url")
+
+@@map("cuisines")
+}
+
+enum dp_gender_enum {
+  male
+  female
+  other
+}
+
+enum dp_status_enum {
+  approved
+  not_approved
+  blocked
+  suspend
+}
+
+enum dp_vehicle_info_enum {
+  ev
+  bike
+  scooter
+  bicycle
+}
+
+enum gender_enum {
+  male
+  female
+  other
+}
+
+enum order_status_enum {
+  pending
+  preparing
+  ready
+  dispatch
+  delivered
+  cancelled
+  rejected
+}
+
+enum payment_status_enum {
+  pending
+  paid
+  failed
+  refunded
+}
+
+enum payment_types_enum {
+  COD
+  ONLINE
+}
+
+enum state_enum {
+  Gujarat
+}
