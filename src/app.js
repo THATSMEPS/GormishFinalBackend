@@ -27,7 +27,7 @@ const app = express();
 
 // Root route handler to redirect or inform about API base path
 app.get('/', (req, res) => {
-  res.send('Welcome! The API base path is /api');
+  res.redirect('/api');
 });
 
 app.use(cors({
