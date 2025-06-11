@@ -1,4 +1,5 @@
 const express = require('express');
+const config = require('./config/environment');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const http = require('http');
@@ -36,7 +37,7 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'success',
     message: 'API is running',
-    environment,
+    environment: config.environment,
     timestamp: new Date()
   });
 });
@@ -62,7 +63,7 @@ app.use((err, req, res, next) => {
   });
   err.status = err.status || 'error';
 
-  if (environment === 'development') {
+  if (config.environment === 'development') {
     if (err.name === 'ValidationError') err = handleValidationError(err);
     if (err.code === 11000) err = handleDuplicateFieldsDB(err);
     if (err.name === 'CastError') err = handleCastError(err);
