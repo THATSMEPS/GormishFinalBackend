@@ -5,6 +5,8 @@ const dotenv = require('dotenv');
 const http = require('http');
 const { Server } = require('socket.io');
 
+const { AppError, handleValidationError, handleDuplicateFieldsDB, handleCastError } = require('./services/errorHandler');
+
 // Load environment variables
 dotenv.config();
 
