@@ -13,7 +13,7 @@ const createArea = async (req, res) => {
     } = req.body;
 
     const existingArea = await prisma.areaTable.findUnique({
-      where: { pincode }
+      where: { areaName }
     });
 
     if (existingArea) {

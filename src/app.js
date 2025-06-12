@@ -3,7 +3,6 @@ const config = require('./config/environment');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const http = require('http');
-const { Server } = require('socket.io');
 
 const { AppError, handleValidationError, handleDuplicateFieldsDB, handleCastError } = require('./services/errorHandler');
 
@@ -103,18 +102,8 @@ app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
 
-// Create HTTP server and attach socket.io
+// Create HTTP server
 const server = http.createServer(app);
-
-const io = new Server(server, {
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST', 'PATCH', 'DELETE']
-  }
-});
-
-// Attach io instance to app for global access
-app.set('io', io);
 
 // Start server
 server.listen(PORT, () => {

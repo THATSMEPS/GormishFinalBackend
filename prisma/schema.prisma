@@ -9,8 +9,8 @@ datasource db {
 }
 
 model AreaTable {
-  pincode     Int          @unique @map("area_pincode")
-  areaName    String       @map("area_name") @db.VarChar
+  pincode     Int          @map("area_pincode")
+  areaName    String       @unique @map("area_name") @db.VarChar
   cityName    String       @map("city_name") @db.VarChar
   stateName   state_enum   @default(Gujarat) @map("state_name")
   latitude    Float        @map("area_latitude")

@@ -103,8 +103,9 @@ const createOrder = async (req, res) => {
       }
     });
 
-    const io = req.app.get('io');
-    io.emit('order:new', fullOrder);
+    // const io = req.app.get('io');
+    // io.emit('order:new', fullOrder);
+
 
     return successResponse(res, { orderId: order.id }, 'Order created successfully', 201);
 
@@ -201,8 +202,9 @@ const updateOrderStatus = async (req, res) => {
       }
     });
 
-    const io = req.app.get('io');
-    io.emit('order:update', fullOrder);
+    // const io = req.app.get('io');
+    // io.emit('order:update', fullOrder);
+
 
     return successResponse(res, updatedOrder, 'Order status updated successfully');
   } catch (error) {

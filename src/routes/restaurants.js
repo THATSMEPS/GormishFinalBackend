@@ -36,14 +36,8 @@ router.post('/logout', authenticateToken, restaurantController.logoutRestaurant)
 router.patch('/:id', authenticateToken, restaurantValidation, validate, restaurantController.updateRestaurant);
 router.patch('/:id/approval', authenticateToken, body('approval').isBoolean(), validate, restaurantController.updateApprovalStatus);
 router.delete('/:id', authenticateToken, restaurantController.deleteRestaurant);
-
 router.put('/:id/openstatus', authenticateToken, restaurantController.updateRestaurantOpenStatus);
-
 // router.patch('/:id/banner', authenticateToken, upload.single('file'), restaurantController.uploadBanner);
 router.patch('/:id/banner', authenticateToken, upload.single('file'), restaurantController.uploadBanner);
-
 router.post('/signup/banner', authenticateToken, upload.single('file'), restaurantController.uploadBannerSignup);
-
-
-
 module.exports = router;
