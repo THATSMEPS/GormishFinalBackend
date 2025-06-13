@@ -28,27 +28,14 @@ const updateStatusValidation = [
 ];
 
 
-// Routes
-// router.get('/', authenticateToken, orderController.getOrders);
 router.get('/', orderController.getOrders);
-// router.get('/:id', authenticateToken, orderController.getOrderById);
+router.get('/getOrdersByReadyStatus', orderController.getOrdersByReadyStatus);
 router.get('/:id', orderController.getOrderById);
 router.post('/', authenticateToken, createOrderValidation, validate, orderController.createOrder);
-// router.post('/', createOrderValidation, validate, orderController.createOrder);
-// router.patch('/:id/status', authenticateToken, updateStatusValidation, validate, orderController.updateOrderStatus);
 router.patch('/:id/status', updateStatusValidation, validate, orderController.updateOrderStatus);
-
-// Customer orders
 router.get('/customer/:customerId', authenticateToken, orderController.getCustomerOrders);
-// router.get('/customer/:customerId', orderController.getCustomerOrders);
-
-// Restaurant orders
-// router.get('/restaurant/:restaurantId', authenticateToken, orderController.getRestaurantOrders);
 router.get('/restaurant/:restaurantId', orderController.getRestaurantOrders);
 router.get('/restaurant/:restaurantId/history', authenticateToken, orderController.getRestaurantOrderHistory);
-
-// Delivery partner orders
-// router.get('/delivery-partner/:dpId', authenticateToken, orderController.getDeliveryPartnerOrders);
 router.get('/delivery-partner/:dpId', orderController.getDeliveryPartnerOrders);
 
 module.exports = router;

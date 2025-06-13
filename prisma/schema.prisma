@@ -80,6 +80,7 @@ model DeliveryPartner {
   vehicleRegistrationNo String?              @unique @map("dp_vehicle_registration_no") @db.VarChar
   homeAddress           String               @map("dp_home_address") @db.VarChar(255)
   id                    String               @id @default(dbgenerated("gen_random_uuid()")) @map("dp_id") @db.Uuid
+  password              String               @map("dp_password") @db.Text
   reviews               OrderReview[]
   orders                Order[]
 

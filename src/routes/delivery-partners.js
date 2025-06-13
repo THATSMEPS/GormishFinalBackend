@@ -5,7 +5,6 @@ const { authenticateToken } = require('../middleware/auth');
 const { body } = require('express-validator');
 const validate = require('../middleware/validation');
 
-// Validation middleware
 const dpValidation = [
   body('mobile').notEmpty(),
   body('name').notEmpty(),
@@ -24,15 +23,16 @@ const statusValidation = [
   body('status').isIn(['approved', 'pending', 'rejected', 'suspended'])
 ];
 
-// Routes
-// router.get('/', authenticateToken, deliveryPartnerController.getDeliveryPartners);
 router.get('/', deliveryPartnerController.getDeliveryPartners);
-// router.get('/:id', authenticateToken, deliveryPartnerController.getDeliveryPartnerById);
 router.get('/:id', deliveryPartnerController.getDeliveryPartnerById);
-router.post('/', dpValidation, validate, deliveryPartnerController.createDeliveryPartner);
-// router.patch('/:id/status', authenticateToken, statusValidation, validate, deliveryPartnerController.updateDeliveryPartnerStatus);
 router.patch('/:id/status', statusValidation, validate, deliveryPartnerController.updateDeliveryPartnerStatus);
-// router.patch('/:id/location', authenticateToken, locationValidation, validate, deliveryPartnerController.updateLiveLocation);
 router.patch('/:id/location', locationValidation, validate, deliveryPartnerController.updateLiveLocation);
+router.post('/', dpValidation, validate, deliveryPartnerController.createDeliveryPartner);
+router.post('/loginDeliveryPartner', validate, deliveryPartnerController.loginDeliveryPartner);
+router.patch('/acceptOrder', validate, deliveryPartnerController.acceptOrder)
+router.patch('/completeOrder', validate, deliveryPartnerController.completeOrder)
+router.patch('/islive/:id', validate, deliveryPartnerController.updateDeliveryPartnerIsLive);
+router.get('/myorders/:dpId', deliveryPartnerController.getDeliveryPartnerOrders); 
 
 module.exports = router;
+

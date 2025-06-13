@@ -330,6 +330,32 @@ const getRestaurantOrderHistory = async (req, res) => {
     return errorResponse(res, 'Error retrieving restaurant order history', 500, error);
   }
 };
+const getOrdersByReadyStatus = async (req, res) => {
+  try {
+    const orders = await prisma.order.findMany({
+      where: {
+        status: { in: ['ready', 'preparing'] }, // Status can be 'ready' or 'preparing'
+        deliveryPartnerId: null, // Delivery partner ID must be null
+        dpAcceptedAt: null, // Delivery partner accepted at must be null
+        dpDeliveredAt: null // Delivery partner delivered at must be null
+      },
+      include: {
+        items: {
+          include: {
+            menuItem: true
+          }
+        },
+        restaurant: true,
+        customer: true,
+        deliveryPartner: true
+      }
+    });
+
+    return successResponse(res, orders, 'Orders retrieved successfully');
+  } catch (error) {
+    return errorResponse(res, 'Error retrieving orders', 500, error);
+  }
+};
 
 module.exports = {
   createOrder,
@@ -339,5 +365,6 @@ module.exports = {
   getCustomerOrders,
   getRestaurantOrders,
   getDeliveryPartnerOrders,
-  getRestaurantOrderHistory
+  getRestaurantOrderHistory,
+  getOrdersByReadyStatus
 };
